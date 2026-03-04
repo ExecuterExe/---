@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Кот в мешке</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Comfortaa:wght@400;600;700&family=Nunito:wght@700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden
+        }
+
+        body {
+            background: #080e14;
+            font-family: 'Comfortaa', cursive;
+            color: #f0e6d3
+        }
+
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 70% 50% at 25% 80%, rgba(8, 70, 90, .35) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 80% 15%, rgba(10, 60, 80, .25) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 30% at 50% 50%, rgba(255, 215, 0, .02) 0%, transparent 50%),
+                linear-gradient(175deg, #060a10 0%, #0a2a35 40%, #071820 70%, #050c12 100%)
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 6px 16px 8px
+        }
+
+        /* HEADER */
+        .hdr {
+            text-align: center;
+            flex-shrink: 0;
+            padding: 2px 0 4px
+        }
+
+        .hdr h1 {
+            font-family: 'Ruslan Display', cursive;
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #ffd700, #ffed85, #ffa726, #ffd700);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 0% center
+            }
+
+            100% {
+                background-position: 200% center
+            }
+        }
+
+        /* PLAYERS BAR */
+        .players {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            padding: 4px 0;
+            flex-shrink: 0;
+            flex-wrap: wrap
+        }
+
+        .plr {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid rgba(255, 215, 0, .08);
+            border-radius: 20px;
+            padding: 2px 6px 2px 10px;
+            font-size: .7em
+        }
+
+        .plr .pname {
+            color: rgba(180, 210, 215, .7);
+            font-weight: 600;
+            white-space: nowrap
+        }
+
+        .plr .pscore {
+            font-family: 'Ruslan Display', cursive;
+            color: #ffd700;
+            font-size: 1.3em;
+            min-width: 16px;
+            text-align: center;
+            transition: transform .2s
+        }
+
+        .plr .pbtn {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, .1);
+            background: rgba(255, 255, 255, .04);
+            color: #aaa;
+            font-size: .75em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .15s;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            line-height: 1
+        }
+
+        .plr .pbtn.plus:hover {
+            background: rgba(46, 204, 113, .2);
+            color: #2ecc71;
+            border-color: rgba(46, 204, 113, .3)
+        }
+
+        .plr .pbtn.minus:hover {
+            background: rgba(231, 76, 60, .2);
+            color: #e74c3c;
+            border-color: rgba(231, 76, 60, .3)
+        }
+
+        /* GRID */
+        .grid-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            gap: 4px
+        }
+
+        .cat-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            flex-shrink: 0
+        }
+
+        .cat-hd {
+            background: linear-gradient(160deg, rgba(255, 215, 0, .08), rgba(255, 215, 0, .02));
+            border: 1px solid rgba(255, 215, 0, .12);
+            border-radius: 12px;
+            padding: 8px 6px;
+            text-align: center;
+            font-family: 'Ruslan Display', cursive;
+            font-size: .85em;
+            color: #e8c547;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px
+        }
+
+        .cat-hd .ci {
+            font-size: 1.3em
+        }
+
+        .q-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 4px;
+            min-height: 0
+        }
+
+        .cell {
+            background: linear-gradient(160deg, rgba(8, 70, 90, .4), rgba(8, 70, 90, .15));
+            border: 1px solid rgba(255, 255, 255, .06);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .25s;
+            position: relative;
+            overflow: hidden
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, .02) 100%);
+            pointer-events: none
+        }
+
+        .cell .val {
+            font-family: 'Ruslan Display', cursive;
+            font-size: 2em;
+            color: #ffd700;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+            transition: all .25s
+        }
+
+        .cell:hover {
+            background: linear-gradient(160deg, rgba(255, 215, 0, .12), rgba(8, 70, 90, .35));
+            border-color: rgba(255, 215, 0, .25);
+            transform: scale(1.04)
+        }
+
+        .cell:hover .val {
+            transform: scale(1.1)
+        }
+
+        .cell.used {
+            background: rgba(255, 255, 255, .015);
+            border-color: rgba(255, 255, 255, .02);
+            cursor: default;
+            pointer-events: none
+        }
+
+        .cell.used .val {
+            opacity: .12
+        }
+
+        .cell.trap {
+            animation: trapFlash .6s ease
+        }
+
+        @keyframes trapFlash {
+
+            0%,
+            100% {
+                border-color: rgba(231, 76, 60, .1)
+            }
+
+            50% {
+                border-color: rgba(231, 76, 60, .8);
+                box-shadow: 0 0 20px rgba(231, 76, 60, .3)
+            }
+        }
+
+        /* MODAL */
+        .mo {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .78);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 15px
+        }
+
+        .mo.show {
+            display: flex
+        }
+
+        .md {
+            background: linear-gradient(160deg, #0b2832, #071a20);
+            border: 1px solid rgba(255, 215, 0, .1);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 780px;
+            max-height: 88vh;
+            overflow-y: auto;
+            animation: mPop .4s cubic-bezier(.68, -.55, .265, 1.55) forwards;
+            position: relative
+        }
+
+        @keyframes mPop {
+            from {
+                transform: scale(.5) translateY(25px);
+                opacity: 0
+            }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1
+            }
+        }
+
+        .md-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px 0
+        }
+
+        .md-cat {
+            font-size: .7em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: rgba(180, 210, 215, .5)
+        }
+
+        .md-pts {
+            font-family: 'Ruslan Display', cursive;
+            font-size: 1.2em;
+            color: #ffd700
+        }
+
+        .md-x {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, .1);
+            background: rgba(255, 255, 255, .04);
+            color: #888;
+            font-size: 1.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s
+        }
+
+        .md-x:hover {
+            background: rgba(231, 76, 60, .2);
+            color: #e74c3c
+        }
+
+        .md-body {
+            padding: 16px 24px 24px
+        }
+
+        .q-text {
+            font-size: 1.4em;
+            line-height: 1.7;
+            color: #fff;
+            margin-bottom: 16px;
+            padding-left: 14px;
+            border-left: 2px solid rgba(255, 215, 0, .15);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, .2)
+        }
+
+        .q-image {
+            width: 100%;
+            max-height: 380px;
+            object-fit: contain;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, .06);
+            margin-bottom: 16px;
+            background: rgba(0, 0, 0, .2)
+        }
+
+        .proverb {
+            font-size: 1.6em;
+            text-align: center;
+            color: #ffd700;
+            font-style: italic;
+            margin: 10px 0 16px;
+            line-height: 1.5;
+            font-family: 'Ruslan Display', cursive
+        }
+
+        .scramble {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 1.8em;
+            letter-spacing: 6px;
+            color: #ffd700;
+            text-align: center;
+            margin: 12px 0;
+            padding: 14px;
+            background: rgba(255, 215, 0, .04);
+            border: 1px solid rgba(255, 215, 0, .12);
+            border-radius: 14px
+        }
+
+        .trap-msg {
+            text-align: center;
+            padding: 30px 0
+        }
+
+        .trap-msg .trap-icon {
+            font-size: 4em;
+            margin-bottom: 12px
+        }
+
+        .trap-msg .trap-text {
+            font-size: 1.5em;
+            color: #e74c3c;
+            font-family: 'Ruslan Display', cursive
+        }
+
+        .trap-msg .trap-sub {
+            color: #999;
+            margin-top: 8px;
+            font-size: 1em
+        }
+
+        .ans-area {
+            text-align: center
+        }
+
+        .ans-btn {
+            background: rgba(255, 255, 255, .04);
+            border: 1px solid rgba(46, 204, 113, .4);
+            color: #2ecc71;
+            padding: 11px 34px;
+            font-size: 1.05em;
+            font-family: 'Comfortaa', cursive;
+            font-weight: 700;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all .3s
+        }
+
+        .ans-btn:hover {
+            background: rgba(46, 204, 113, .1);
+            transform: translateY(-2px)
+        }
+
+        .ans-rev {
+            display: none;
+            margin-top: 14px
+        }
+
+        .ans-rev.show {
+            display: block;
+            animation: ansPop .5s cubic-bezier(.68, -.55, .265, 1.55) forwards
+        }
+
+        @keyframes ansPop {
+            from {
+                opacity: 0;
+                transform: scale(.4)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1)
+            }
+        }
+
+        .ans-lbl {
+            font-size: .65em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: rgba(180, 210, 215, .4);
+            margin-bottom: 4px
+        }
+
+        .ans-txt {
+            font-family: 'Ruslan Display', cursive;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #ffd700, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .ans-desc {
+            margin-top: 8px;
+            color: #aaa;
+            font-size: .95em;
+            line-height: 1.5;
+            font-style: italic
+        }
+
+        .ans-image {
+            width: 100%;
+            max-height: 260px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, .06)
+        }
+
+        /* ===== QUESTION TIMER ===== */
+        .timer-section {
+            text-align: center;
+            margin: 18px 0 8px;
+        }
+
+        .btn-timer {
+            background: rgba(255, 215, 0, .08);
+            border: 1px solid rgba(255, 215, 0, .35);
+            color: #ffd700;
+            padding: 10px 28px;
+            font-size: .95em;
+            font-family: 'Comfortaa', cursive;
+            font-weight: 700;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all .3s
+        }
+
+        .btn-timer:hover {
+            background: rgba(255, 215, 0, .15);
+            transform: translateY(-2px)
+        }
+
+        .btn-timer:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            transform: none !important
+        }
+
+        .timer-display {
+            display: none;
+            margin-top: 14px;
+            text-align: center
+        }
+
+        .timer-display.active {
+            display: block;
+            animation: ansPop .4s cubic-bezier(.68, -.55, .265, 1.55) forwards
+        }
+
+        .timer-circle {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 8px
+        }
+
+        .timer-circle svg {
+            width: 90px;
+            height: 90px;
+            transform: rotate(-90deg)
+        }
+
+        .timer-circle .t-track {
+            fill: none;
+            stroke: rgba(255, 215, 0, .08);
+            stroke-width: 5
+        }
+
+        .timer-circle .t-progress {
+            fill: none;
+            stroke: #ffd700;
+            stroke-width: 5;
+            stroke-linecap: round;
+            stroke-dasharray: 226.19;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke .5s
+        }
+
+        .timer-circle .t-progress.t-warn {
+            stroke: #e74c3c
+        }
+
+        .timer-num {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Ruslan Display', cursive;
+            font-size: 1.6em;
+            color: #ffd700;
+            transition: color .5s
+        }
+
+        .timer-num.t-warn {
+            color: #e74c3c;
+            animation: tPulse .5s ease-in-out infinite
+        }
+
+        @keyframes tPulse {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1)
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.15)
+            }
+        }
+
+        .timer-lbl {
+            font-size: .75em;
+            color: rgba(180, 210, 215, .5)
+        }
+
+        .timer-lbl.t-done {
+            color: #e74c3c;
+            font-weight: 700;
+            font-size: .85em
+        }
+
+        @media(max-height:650px) {
+            .hdr h1 {
+                font-size: 1.4em
+            }
+
+            .cat-hd {
+                padding: 5px 4px;
+                font-size: .75em
+            }
+
+            .cell .val {
+                font-size: 1.6em
+            }
+
+            .players {
+                gap: 3px
+            }
+
+            .plr {
+                padding: 1px 4px 1px 8px;
+                font-size: .65em
+            }
+        }
+
+        @media(max-width:700px) {
+            .cat-hd {
+                font-size: .7em
+            }
+
+            .cell .val {
+                font-size: 1.4em
+            }
+
+            .q-text {
+                font-size: 1.15em
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg"></div>
+    <div class="app">
+        <div class="hdr">
+            <h1>💰 Кот в мешке</h1>
+        </div>
+
+        <div class="players" id="players"></div>
+
+        <div class="grid-wrap">
+            <div class="cat-row">
+                <div class="cat-hd"><span class="ci">🪙</span>Копейка рубль бережёт</div>
+                <div class="cat-hd"><span class="ci">💼</span>Работа не волк</div>
+                <div class="cat-hd"><span class="ci">🧓</span>Премудрости народные</div>
+                <div class="cat-hd"><span class="ci">⚒️</span>Труд и талант</div>
+            </div>
+            <div class="q-grid" id="grid"></div>
+        </div>
+    </div>
+
+    <div class="mo" id="overlay">
+        <div class="md">
+            <button class="md-x" onclick="closeModal()">✕</button>
+            <div class="md-top"><span class="md-cat" id="mCat"></span><span class="md-pts" id="mPts"></span></div>
+            <div class="md-body" id="mBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const NUM_PLAYERS = 10;
+        let scores = Array(NUM_PLAYERS).fill(0);
+
+        let qTimer = null;
+        const Q_TIMER_DURATION = 20;
+        const Q_CIRCUMFERENCE = 2 * Math.PI * 36;
+
+        function buildPlayers() {
+            const c = document.getElementById('players'); c.innerHTML = '';
+            for (let i = 0; i < NUM_PLAYERS; i++) {
+                const d = document.createElement('div'); d.className = 'plr';
+                d.innerHTML = `<span class="pname">И${i + 1}</span>
+            <span class="pbtn minus" onclick="addP(${i},-1)">−</span>
+            <span class="pscore" id="ps${i}">0</span>
+            <span class="pbtn plus" onclick="addP(${i},1)">+</span>`;
+                c.appendChild(d);
+            }
+        }
+        function addP(i, v) {
+            scores[i] = Math.max(0, scores[i] + v);
+            const el = document.getElementById('ps' + i);
+            el.textContent = scores[i];
+            el.style.transform = 'scale(1.4)';
+            setTimeout(() => el.style.transform = 'scale(1)', 200);
+        }
+
+        const DATA = [
+            // === КАТ 1: Копейка рубль бережёт ===
+            [
+                { pts: 1, question: 'Денежка без <b>???</b>, а весь свет обойдёт.<br>Какое слово из анатомии мы пропустили?', answer: 'Ног', desc: '«Денежка без ног, а весь свет обойдёт» — народная пословица' },
+                { pts: 2, question: 'Книга и блокнот вместе стоят 350 рублей. Книга стоит на 300 рублей дороже блокнота.<br><br>Сколько стоит блокнот?', answer: '25 рублей', desc: 'Блокнот = 25 руб., Книга = 325 руб. (25+300). Итого 350.' },
+                { pts: 3, question: 'Есть такая аббревиатура как «НПФ», являющаяся альтернативой социальному фонду России по вопросу получения определенных доходностей.<br><br>Как НПФ расшифровывается?', answer: 'Негосударственный пенсионный фонд', desc: '' },
+                { pts: 4, question: 'Есть такая формула как <b>72 разделить на процентную ставку</b>, которая может быть полезной для инвестиций. Что именно она находит?', answer: 'Срок удвоения инвестиций/вклада', desc: 'Полезная формула, с погрешностями, но полезная!' },
+                { pts: 5, question: 'Перед вами слово, где буквы расположены неправильно. Переставьте их так, чтобы получился термин из финансовой грамотности:', scramble: 'ФВРИИЕЦИЯИАКДС', answer: 'Диверсификация', desc: 'Распределение вложений для снижения рисков' }
+            ],
+            // === КАТ 2: Работа не волк ===
+            [
+                { pts: 1, image: 'questions/Вакансия1.png', ansImage: 'questions/Вакансия11.png' },
+                { pts: 2, image: 'questions/Вакансия2.png', ansImage: 'questions/Вакансия22.png' },
+                { pts: 3, image: 'questions/Вакансия3.png', ansImage: 'questions/Вакансия33.png' },
+                { pts: 4, image: 'questions/Вакансия4.png', ansImage: 'questions/Вакансия44.png' },
+                { pts: 5, image: 'questions/Вакансия5.png', ansImage: 'questions/Вакансия55.png' }
+            ],
+            // === КАТ 3: Премудрости народные ===
+            [
+                { pts: 1, question: 'Восстановите популярную фразу финансовой грамотности:', proverb: '«Не … все … в одну …»', answer: 'Не клади все яйца в одну корзину', desc: 'Принцип диверсификации' },
+                { pts: 2, question: 'Проговорите эту скороговорку 3 раза подряд, ни разу не запнувшись и не говоря медленно:', proverb: '«Расскажите про покупки! — Про какие про покупки? — Про покупки, про покупки, про покупочки мои!»', answer: 'Скороговорка', desc: 'Оценивает жюри' },
+                { pts: 3, question: 'Перед вами пословица, в которой ВСЕ слова заменены антонимами. Восстановите оригинал:', proverb: '«Актив поступлением бледен»', answer: 'Долг платежом красен', desc: 'Актив→Долг, Поступление→Платёж, Бледен→Красен' },
+                { pts: 4, question: 'Перед вами три фразы, где пропущены числа. Восстановите их, сложите. Вы получите значение в рублях. А сколько это в копейках?', proverb: '1. «… — бабка ягодка опять»\n2. «… и одна ночь»\n3. «… колесо в телеге»', answer: '105 000 копеек', desc: '45 + 1001 + 5 = 1051? Нет: 45+1001+5=1051, но правильно: 45+1000+5=1050 руб = 105 000 коп.' },
+                { pts: 5, question: 'Объясните пословицу:', proverb: '«Удить серебряным крючком»', answer: 'Добиваться цели с помощью денег / подкупа', desc: '' }
+            ],
+            // === КАТ 4: Труд и талант ===
+            [
+                { pts: 1, question: 'В договоре у Балды написано: оклад 100 рублей. Но на руки он получил 87 рублей.<br><br>Назовите полное название налога, который повлиял на это.', answer: 'Налог на доходы физических лиц', desc: 'НДФЛ — 13%' },
+                { pts: 2, question: 'Что лишнее в следующем перечне навыков и почему?<br><br>• Коммуникабельность<br>• Стрессоустойчивость<br>• Знание английского языка<br>• Лидерство', answer: 'Знание английского языка', desc: 'Это Hard Skill (жёсткий навык), остальное — Soft Skills (мягкие навыки)' },
+                { pts: 3, question: 'Как называется процесс передачи своих задач другим исполнителям (подрядчикам)?', answer: 'Делегирование', desc: '' },
+                { pts: 4, question: 'Ещё до изобретения холодильника была такая профессия как «Молочник».<br><br>В чём заключалась их основная обязанность?', answer: 'Доставка молока до дома', desc: 'Молочник ежедневно доставлял свежее молоко к порогу покупателя' },
+                { pts: 5, image: 'questions/Труд5.png', question: 'Перед вами старый логотип известной организации. Назовите её.', ansImage: 'questions/Труд55.png', answer: '' }
+            ]
+        ];
+
+        const CAT_NAMES = ['Копейка рубль бережёт', 'Работа не волк', 'Премудрости народные', 'Труд и талант'];
+
+        function buildGrid() {
+            const g = document.getElementById('grid'); g.innerHTML = '';
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 4; col++) {
+                    const d = DATA[col][row];
+                    const c = document.createElement('div'); c.className = 'cell'; c.id = `c${col}_${row}`;
+                    c.innerHTML = `<span class="val">${d.pts}</span>`;
+                    c.onclick = () => openQ(col, row);
+                    g.appendChild(c);
+                }
+            }
+        }
+
+        // Timer functions
+        function resetQTimer() {
+            clearInterval(qTimer);
+            qTimer = null;
+        }
+
+        function startQTimer() {
+            resetQTimer();
+            let remaining = Q_TIMER_DURATION;
+            const numEl = document.getElementById('qTimerNum');
+            const progEl = document.getElementById('qTimerProg');
+            const lblEl = document.getElementById('qTimerLbl');
+            const btnEl = document.getElementById('qTimerBtn');
+            const dispEl = document.getElementById('qTimerDisp');
+
+            btnEl.disabled = true;
+            btnEl.textContent = '⏳ Идёт отсчёт...';
+            dispEl.classList.add('active');
+            numEl.textContent = remaining;
+            numEl.classList.remove('t-warn');
+            progEl.style.strokeDashoffset = '0';
+            progEl.classList.remove('t-warn');
+            lblEl.textContent = '⏱ Время на ответ';
+            lblEl.className = 'timer-lbl';
+
+            qTimer = setInterval(() => {
+                remaining--;
+                numEl.textContent = remaining;
+                const offset = Q_CIRCUMFERENCE * (1 - remaining / Q_TIMER_DURATION);
+                progEl.style.strokeDashoffset = offset;
+
+                if (remaining <= 5) {
+                    numEl.classList.add('t-warn');
+                    progEl.classList.add('t-warn');
+                }
+
+                if (remaining <= 0) {
+                    clearInterval(qTimer);
+                    qTimer = null;
+                    numEl.textContent = '0';
+                    lblEl.textContent = '🔔 Время вышло!';
+                    lblEl.className = 'timer-lbl t-done';
+                    btnEl.disabled = false;
+                    btnEl.textContent = '🔄 Заново';
+                }
+            }, 1000);
+        }
+
+        function onTimerBtnClick() {
+            const btnEl = document.getElementById('qTimerBtn');
+            if (btnEl.textContent.includes('Заново')) {
+                resetQTimer();
+                const dispEl = document.getElementById('qTimerDisp');
+                const numEl = document.getElementById('qTimerNum');
+                const progEl = document.getElementById('qTimerProg');
+                numEl.classList.remove('t-warn');
+                progEl.classList.remove('t-warn');
+                progEl.style.strokeDashoffset = '0';
+                dispEl.classList.remove('active');
+                btnEl.disabled = false;
+                btnEl.textContent = '⏱ Время на ответ';
+                setTimeout(() => startQTimer(), 100);
+            } else {
+                startQTimer();
+            }
+        }
+
+        function getTimerHTML() {
+            return `<div class="timer-section">
+                <button class="btn-timer" id="qTimerBtn" onclick="onTimerBtnClick()">⏱ Время на ответ</button>
+                <div class="timer-display" id="qTimerDisp">
+                    <div class="timer-circle">
+                        <svg viewBox="0 0 90 90">
+                            <circle class="t-track" cx="45" cy="45" r="36"/>
+                            <circle class="t-progress" id="qTimerProg" cx="45" cy="45" r="36"/>
+                        </svg>
+                        <div class="timer-num" id="qTimerNum">${Q_TIMER_DURATION}</div>
+                    </div>
+                    <div class="timer-lbl" id="qTimerLbl">⏱ Время на ответ</div>
+                </div>
+            </div>`;
+        }
+
+        function openQ(col, row) {
+            const d = DATA[col][row];
+            const cell = document.getElementById(`c${col}_${row}`);
+            if (cell.classList.contains('used')) return;
+            cell.classList.add('used');
+
+            // Reset any running timer
+            resetQTimer();
+
+            document.getElementById('mCat').textContent = CAT_NAMES[col];
+            document.getElementById('mPts').textContent = d.pts + (d.pts === 1 ? ' балл' : d.pts < 5 ? ' балла' : ' баллов');
+
+            let html = '';
+
+            // Trap
+            if (d.trap) {
+                cell.classList.add('trap');
+                html += `<div class="trap-msg">
+            <div class="trap-icon">💀</div>
+            <div class="trap-text">${d.trapText}</div>
+            <div class="trap-sub">${d.trapSub}</div>
+        </div>`;
+                document.getElementById('mBody').innerHTML = html;
+                document.getElementById('overlay').classList.add('show');
+                return;
+            }
+
+            if (d.question) html += `<div class="q-text">${d.question}</div>`;
+            if (d.proverb) {
+                const lines = d.proverb.replace(/\n/g, '<br>');
+                html += `<div class="proverb">${lines}</div>`;
+            }
+            if (d.scramble) html += `<div class="scramble">${d.scramble}</div>`;
+            if (d.image) html += `<img class="q-image" src="${d.image}" alt="Вопрос" onerror="this.style.display='none'">`;
+
+            // Timer button
+            html += getTimerHTML();
+
+            html += `<div class="ans-area">
+        <button class="ans-btn" id="aBtn" onclick="showAns()">👁 Показать ответ</button>
+        <div class="ans-rev" id="aRev"><div class="ans-lbl">Ответ</div>`;
+            if (d.answer) html += `<div class="ans-txt">${d.answer}</div>`;
+            if (d.desc) html += `<div class="ans-desc">${d.desc}</div>`;
+            if (d.ansImage) html += `<img class="ans-image" src="${d.ansImage}" alt="Ответ" onerror="this.style.display='none'">`;
+            html += `</div></div>`;
+
+            document.getElementById('mBody').innerHTML = html;
+            document.getElementById('overlay').classList.add('show');
+        }
+
+        function showAns() {
+            document.getElementById('aBtn').style.display = 'none';
+            document.getElementById('aRev').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('show');
+            resetQTimer();
+        }
+        document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        buildPlayers();
+        buildGrid();
+    </script>
+</body>
+
+</html>
